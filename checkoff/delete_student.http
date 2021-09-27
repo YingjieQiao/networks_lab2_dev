@@ -1,0 +1,13 @@
+DELETE http://127.0.0.1:8000/student HTTP/1.1
+Content-Type: application/json
+
+{
+    "name":  "Walter White",
+    "email": "walter_white@sutd.edu",
+    "gpa": 5.3
+
+}
+
+
+
+###
