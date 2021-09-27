@@ -12,7 +12,9 @@ TODO:
 
 ## Setup
 
-Using FastAPI and PostgreSQL.
+Using FastAPI and PostgreSQL. This implements a student - course system where each course could enroll multiple students, but
+a student can have at most 1 course. (see a command-line illustration of the one-to-many relationship [here](one2many.md)),
+and a gallery to showcase some beautiful images.
 
 ### To run the API server locally
 
@@ -48,11 +50,14 @@ psql networks_lab2 -U networks_lab2_user
 | --- | --- | --- | --- | --- |
 | GET `heartbeat` | returns a string "The connection is up" | 200 if success |  --- | --- |
 | POST `/course` | creates a new `Course` in the table `Course` |  200 if successfully created | 400 if already exists | --- |
-| POST `/student` | creates a new `Student` in the table `Student` |200 if successfully created | 400 if already exists | --- |
+| POST `/student` | creates a new `Student` in the table `Student` | 200 if successfully created | 400 if already exists | --- |
 | GET `course_all` | returns all rows in table `Course` | 200 if success | 500 for unexpected server side errors | --- |
- | GET `student_all` | returns all rows in table `Student` | 200 if success | 500 for unexpected server side errors | --- |
+| GET `student_all` | returns all rows in table `Student` | 200 if success | 500 for unexpected server side errors | --- |
 | GET `/course/{course_id}` | get a new `Course` in the table `Course` given a `course_id` | 200 if successfully retrieved | 404 if not found | --- |
 | GET `/student/{student_id}` | get a new `Student` in the table `Student` given a `student_id` |200 if successfully retrieved | 404 if not found | --- |
+| DELETE `/course` | delete the specified `Course` in the payload from the table `Course` |  200 if successfully deleted | 404 if not found | --- |
+| DELETE `/student` | delete the specified `Student` in the payload from the table `Student` |  200 if successfully deleted | 404 if not found |  --- |
+| PUT `/course/{course_id}/{student_id}` | allocate a `Student` to a `Courset` |  200 if success | 404 if `Student` or `Course` not found; 500 for unexpected server side errors  |  --- |
 
 
 ## Checkoff Requirements
@@ -74,18 +79,23 @@ psql networks_lab2 -U networks_lab2_user
             - see POST `/course`, POST `/student`, to create with attributes
             - schema vs attributes ?
         - show that the resource has indeed been created through another HTTP request
-            - see GET `/course/{course_id}`, GET `/student/{student_id}`
         - has validation and returns an appropriate HTTP response code if the input data is invalid (e.g. missing name)
-            - see `xxx` ???
+            - see GET `/course/{course_id}`, GET `/student/{student_id}` (TODO: 400 for bad request input)
     - either a DELETE or PUT request...
         - that deletes or updates a _single_ resource respectively
         - show that the resource has indeed been modified through another HTTP request 
         = has validation and returns an appropiate HTTP response code if the input data is invalid 
         (e.g. trying to delete a nonexistent user)
+            - see DELETE `/course`, DELETE `/student`, PUT `/course/{course_id}/{student_id}`
 - Identify which routes in your application are _idempotent_, and provide proof to support your answer.
 - Implement at least two of the following challenges:
     - File upload in a POST request, using multipart/form-data
+        - see ``. To my knowledge, I think the best way to store large binary assets like image and video is to
+        save them to an Object Store service like AWS S3, or save a path to the asset in the database table and keep
+        the asset somewhere on the disk, which is more efficient. For simplicity, I am saving the images here to the
+        database table as `LargeBinary` objects. 
     - Have a route in your application that returns a content type that is not _plaintext_
+        - fuck all wrong
     - Some form of authorization through inspecting the request headers
     - A special route that can perform a batch delete or update of resources matching a certain condition
 

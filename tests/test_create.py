@@ -2,7 +2,7 @@ from fastapi.testclient import TestClient
 import json
 
 from ..app.main import app as application
-from ..assets.constants import students, courses
+from tests.assets.constants import students, courses
 
 client = TestClient(application)
 

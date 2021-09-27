@@ -36,3 +36,18 @@ class Course(CourseBase):
     class Config:
         orm_mode = True
 
+
+class ImageBase(BaseModel):
+    name: str
+    # image_base64str: str
+
+
+class ImageCreate(ImageBase):
+    pass
+
+
+class Image(ImageBase):
+    id: int
+
+    class Config:
+        orm_mode = True
