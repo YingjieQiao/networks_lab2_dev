@@ -6,6 +6,7 @@ from pydantic import BaseModel
 class StudentBase(BaseModel):
     name: str
     email: str
+    gpa: float
 
 
 class StudentCreate(StudentBase):
@@ -13,7 +14,7 @@ class StudentCreate(StudentBase):
 
 class Student(StudentBase):
     id: int
-    course_id: int
+    course_id: Optional[int]
 
     class Config:
         orm_mode = True

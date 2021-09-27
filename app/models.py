@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Float
 from sqlalchemy.orm import relationship
 
 from .database import Base
@@ -8,8 +8,9 @@ class Student(Base):
     __tablename__ = "student"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True)
-    email = Column(String, unique=True, index=True)
+    name = Column(String(50), unique=True, index=True)
+    email = Column(String(100), unique=True, index=True)
+    gpa = Column(Float, unique=False)
 
     course_id = Column(Integer, ForeignKey('course.id'))
     # course = relationship("Student", back_populates="enrolled_students")
