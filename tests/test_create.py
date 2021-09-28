@@ -11,7 +11,8 @@ CREATE_COURSE_SUCCESS = courses[0]
 
 
 def test_create_course():
-    response = client.post("/course", data=json.dumps(CREATE_COURSE_SUCCESS))
+    response = client.post("/course", data=json.dumps(CREATE_COURSE_SUCCESS),
+                           headers={"X-Token": "123"})
     assert response.status_code == 200
 
 

@@ -92,14 +92,16 @@ psql networks_lab2 -U networks_lab2_user
 - Identify which routes in your application are _idempotent_, and provide proof to support your answer.
 - Implement at least two of the following challenges:
     - File upload in a POST request, using multipart/form-data
-        - see ``. To my knowledge, I think the best way to store large binary assets like image and video is to
-        save them to an Object Store service like AWS S3, or save a path to the asset in the database table and keep
-        the asset somewhere on the disk, which is more efficient. For simplicity, I am saving the images here to the
-        database table as `LargeBinary` objects. 
+        - see POST `/file`. To my knowledge, I think the best way to store large binary assets like image and video is to
+        save them to an Object Store service like AWS S3, or a base64 string in the database table (for images), or save a path to the asset in the database table and keep
+        the asset somewhere on the disk, which is more efficient. For simplicity, I am saving the images here to a 
+        server disk. 
     - Have a route in your application that returns a content type that is not _plaintext_
-        - fuck all wrong
+        - see GET `/file/{filename}`, which returns a `FileResponse`.
     - Some form of authorization through inspecting the request headers
-    - A special route that can perform a batch delete or update of resources matching a certain condition
+    - A special route that can perform a batch delete or update of resources 
+    matching a certain condition
+        - PUT `/student/pullup_gpa/{threshold}/{delta}`
 
 > You must provide ample documentation on how to build & run your code and how to make the HTTP requests to your API, 
 >as well as what are the expected responses for each request. 

@@ -1,7 +1,8 @@
 from typing import List, Optional
 import os, base64, shutil
+from functools import wraps
 
-from fastapi import Depends, FastAPI, HTTPException, UploadFile, File
+from fastapi import Depends, FastAPI, HTTPException, UploadFile, File, Request, Header
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
@@ -11,6 +12,7 @@ from .database import SessionLocal, engine
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+SECRET_KEY = "123"
 
 
 # Dependency
@@ -22,13 +24,19 @@ def get_db():
         db.close()
 
 
+def check_request_header(x_token: str = Header(...)):
+    if x_token != SECRET_KEY:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+
 # endpoints
-@app.get("/heartbeat", status_code=200)
+@app.get("/heartbeat", dependencies=[Depends(check_request_header)], status_code=200)
 def heartbeat():
     return "The connection is up"
 
 
-@app.post("/course", response_model=schemas.Course, status_code=200)
+@app.post("/course", dependencies=[Depends(check_request_header)],
+          response_model=schemas.Course, status_code=200)
 def create_course(course: schemas.CourseCreate, db: Session = Depends(get_db)):
     db_course = crud.get_course(db, course=course)
     if db_course:
@@ -36,7 +44,8 @@ def create_course(course: schemas.CourseCreate, db: Session = Depends(get_db)):
     return crud.create_course(db=db, course=course)
 
 
-@app.delete("/course", response_model=schemas.Course, status_code=200)
+@app.delete("/course", dependencies=[Depends(check_request_header)],
+            response_model=schemas.Course, status_code=200)
 def delete_course(course: schemas.CourseCreate, db: Session = Depends(get_db)):
     deleted_course = crud.delete_course(db, course)
     if deleted_course is None:
@@ -44,7 +53,8 @@ def delete_course(course: schemas.CourseCreate, db: Session = Depends(get_db)):
     return deleted_course
 
 
-@app.post("/student", response_model=schemas.Student, status_code=200)
+@app.post("/student", dependencies=[Depends(check_request_header)],
+          response_model=schemas.Student, status_code=200)
 def create_student(student: schemas.StudentCreate, db: Session = Depends(get_db)):
     db_student = crud.get_student(db, student=student)
     if db_student:
@@ -52,7 +62,8 @@ def create_student(student: schemas.StudentCreate, db: Session = Depends(get_db)
     return crud.create_student(db=db, student=student)
 
 
-@app.delete("/student", response_model=schemas.Student, status_code=200)
+@app.delete("/student", dependencies=[Depends(check_request_header)],
+            response_model=schemas.Student, status_code=200)
 def delete_student(student: schemas.StudentCreate, db: Session = Depends(get_db)):
     deleted_student = crud.delete_student(db, student)
     if deleted_student is None:
@@ -60,7 +71,8 @@ def delete_student(student: schemas.StudentCreate, db: Session = Depends(get_db)
     return deleted_student
 
 
-@app.put("/course/{course_id}/{student_id}", response_model=schemas.Student, status_code=200)
+@app.put("/course/{course_id}/{student_id}", dependencies=[Depends(check_request_header)],
+         response_model=schemas.Student, status_code=200)
 def add_student_to_course(
     course_id: int, student_id: int, db: Session = Depends(get_db)
 ):
@@ -76,7 +88,8 @@ def add_student_to_course(
         raise HTTPException(status_code=500, detail="unexpected error in query.")
 
 
-@app.get("/course", response_model=List[schemas.Course], status_code=200)
+@app.get("/course", dependencies=[Depends(check_request_header)],
+         response_model=List[schemas.Course], status_code=200)
 def get_course(db: Session = Depends(get_db)):
     try:
         courses = crud.get_all_course(db)
@@ -85,9 +98,10 @@ def get_course(db: Session = Depends(get_db)):
     return courses
 
 
-@app.get("/student", response_model=List[schemas.Student], status_code=200)
+@app.get("/student", dependencies=[Depends(check_request_header)],
+         response_model=List[schemas.Student], status_code=200)
 def get_student(sort_by: Optional[str] = None, limit: Optional[int] = None,
-                offset: Optional[int] = None, db: Session = Depends(get_db),):
+                offset: Optional[int] = None, db: Session = Depends(get_db)):
     try:
         students = crud.get_all_student(db, sort_by, limit, offset)
     except:
@@ -95,7 +109,8 @@ def get_student(sort_by: Optional[str] = None, limit: Optional[int] = None,
     return students
 
 
-@app.get("/course/{course_name}", response_model=schemas.Course, status_code=200)
+@app.get("/course/{course_name}", dependencies=[Depends(check_request_header)],
+         response_model=schemas.Course, status_code=200)
 def get_course_by_name(student_name: str, db: Session = Depends(get_db)):
     db_student = crud.get_student_by_name(db, student_name)
     if db_student is None:
@@ -103,7 +118,8 @@ def get_course_by_name(student_name: str, db: Session = Depends(get_db)):
     return db_student
 
 
-@app.get("/student/{student_name}", response_model=schemas.Student, status_code=200)
+@app.get("/student/{student_name}", dependencies=[Depends(check_request_header)],
+         response_model=schemas.Student, status_code=200)
 def get_student_by_name(student_name: str, db: Session = Depends(get_db)):
     db_student = crud.get_student_by_name(db, student_name)
     if db_student is None:
@@ -111,7 +127,8 @@ def get_student_by_name(student_name: str, db: Session = Depends(get_db)):
     return db_student
 
 
-@app.get("/course/byid/{course_id}", response_model=schemas.Course, status_code=200)
+@app.get("/course/byid/{course_id}", dependencies=[Depends(check_request_header)],
+         response_model=schemas.Course, status_code=200)
 def get_course_by_id(course_id: int, db: Session = Depends(get_db)):
     db_course = crud.get_course_by_id(db, course_id=course_id)
     if db_course is None:
@@ -119,7 +136,8 @@ def get_course_by_id(course_id: int, db: Session = Depends(get_db)):
     return db_course
 
 
-@app.get("/student/byid/{student_id}", response_model=schemas.Student, status_code=200)
+@app.get("/student/byid/{student_id}", dependencies=[Depends(check_request_header)],
+         response_model=schemas.Student, status_code=200)
 def get_student_by_id(student_id: int, db: Session = Depends(get_db)):
     db_student = crud.get_student_by_id(db, student_id)
     if db_student is None:
@@ -127,7 +145,7 @@ def get_student_by_id(student_id: int, db: Session = Depends(get_db)):
     return db_student
 
 
-@app.post("/file", status_code=200)
+@app.post("/file", dependencies=[Depends(check_request_header)], status_code=200)
 def upload_image(uploaded_file: UploadFile = File(...), db: Session = Depends(get_db)):
     filename = uploaded_file.filename
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "object_store", filename)
@@ -150,7 +168,7 @@ def upload_image(uploaded_file: UploadFile = File(...), db: Session = Depends(ge
     return True
 
 
-@app.get("/file/{filename}", status_code=200)
+@app.get("/file/{filename}", dependencies=[Depends(check_request_header)], status_code=200)
 def download_image(filename: str, db: Session = Depends(get_db)):
     db_file = crud.get_file_row(db, filename)
     if db_file is None:
@@ -158,6 +176,16 @@ def download_image(filename: str, db: Session = Depends(get_db)):
 
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "object_store", filename)
     return FileResponse(path)
+
+
+# http://127.0.0.1:8000/student/pullup_gpa/4.0/0.01
+@app.put("/student/pullup_gpa/{threshold}/{delta}", dependencies=[Depends(check_request_header)], status_code=200)
+def pullup_gpa(threshold: float, delta: float, db: Session = Depends(get_db)):
+    try:
+        db_students = crud.batch_update_student_gpa(db, threshold, delta)
+        return db_students
+    except:
+        raise HTTPException(status_code=500, detail="server side error")
 
 
 # cannot use plaintext, must use multipart/form-data
@@ -182,14 +210,3 @@ def download_image(filename: str, db: Session = Depends(get_db)):
 #         .format("data:image/jpeg;base64,"+db_image.image_base64str, db_image.name)
 #     return image_to_render
 
-
-#
-# @app.post("/batch_course", response_model=schemas.Course)
-# def create_batch_course(courses: List[schemas.CourseCreate], db: Session = Depends(get_db)):
-#     res = []
-#     for course in courses:
-#         db_course = crud.get_course(db, course=course)
-#         if db_course:
-#             raise HTTPException(status_code=400, detail="This course has already been created.")
-#         res.append(crud.create_course(db=db, course=course))
-#     return res

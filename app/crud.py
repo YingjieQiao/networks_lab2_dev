@@ -48,7 +48,8 @@ def delete_student(db: Session, student: schemas.StudentCreate):
 
 def add_student_to_course(db: Session, course: schemas.Course, student: schemas.Student):
     try:
-        updated_student = db.query(models.Student).filter(models.Student.id == student.id).update("course_id", course.id)
+        updated_student = db.query(models.Student).filter(models.Student.id == student.id).first()
+        updated_student.course_id = course.id
         db.commit()
     except:
         raise Exception("Failed to update database")
@@ -128,4 +129,12 @@ def create_file_row(db: Session, name: str):
     db.refresh(db_file)
 
     return True
+
+
+def batch_update_student_gpa(db: Session, threshold: float, delta: float):
+    updated_rows_count = db.query(models.Student).filter(models.Student.gpa <= threshold).\
+                    update({models.Student.gpa : models.Student.gpa + delta})
+    db.commit()
+
+    return updated_rows_count
 
