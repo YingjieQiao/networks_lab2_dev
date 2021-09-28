@@ -1,13 +1,9 @@
+from typing import Optional
+
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
 
 from . import models, schemas
-
-
-
-# TODO: offset
-# def get_courses(db: Session, skip: int = 0, limit: int = 100):
-#     return db.query(models.Course).offset(skip).limit(limit).all()
 
 
 def create_course(db: Session, course: schemas.CourseCreate):
@@ -48,10 +44,6 @@ def delete_student(db: Session, student: schemas.StudentCreate):
     db.commit()
 
     return affected_rows
-
-# TODO: offset
-# def get_students(db: Session, skip: int = 0, limit: int = 100):
-#     return db.query(models.Student).offset(skip).limit(limit).all()
 
 
 def add_student_to_course(db: Session, course: schemas.Course, student: schemas.Student):
@@ -105,11 +97,19 @@ def get_all_course(db: Session):
         raise Exception("unexpected error in query")
 
 
-def get_all_student(db: Session):
-    try:
-        return db.query(models.Student).all()
-    except:
-        raise Exception("unexpected error in query")
+def get_all_student(db: Session, sort_by: Optional[str] = None,
+                    limit: Optional[int] = None, offset: Optional[int] = None):
+    # try:
+    db_student = db.query(models.Student)
+    if sort_by is not None:
+        db_student = db_student.order_by(sort_by)
+    if limit is not None:
+        db_student = db_student.limit(limit)
+    if offset is not None:
+        db_student = db_student.offset(offset)
+    return db_student.all()
+    # except:
+    #     raise Exception("error in query")
 
 
 def get_image_row(db: Session, name: str):

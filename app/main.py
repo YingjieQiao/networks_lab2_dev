@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 import os, base64
 
 from fastapi import Depends, FastAPI, HTTPException, UploadFile, File
@@ -75,8 +75,8 @@ def add_student_to_course(
         raise HTTPException(status_code=500, detail="unexpected error in query.")
 
 
-@app.get("/course_all", response_model=List[schemas.Course], status_code=200)
-def get_all_course(db: Session = Depends(get_db)):
+@app.get("/course", response_model=List[schemas.Course], status_code=200)
+def get_course(db: Session = Depends(get_db)):
     try:
         courses = crud.get_all_course(db)
     except:
@@ -84,12 +84,13 @@ def get_all_course(db: Session = Depends(get_db)):
     return courses
 
 
-@app.get("/student_all", response_model=List[schemas.Student], status_code=200)
-def get_all_course(db: Session = Depends(get_db)):
-    try:
-        students = crud.get_all_student(db)
-    except:
-        raise HTTPException(status_code=500, detail="unexpected error in query")
+@app.get("/student", response_model=List[schemas.Student], status_code=200)
+def get_student(sort_by: Optional[str] = None, limit: Optional[int] = None,
+                offset: Optional[int] = None, db: Session = Depends(get_db),):
+    # try:
+    students = crud.get_all_student(db, sort_by, limit, offset)
+    # except:
+    #     raise HTTPException(status_code=500, detail="unexpected error in query")
     return students
 
 

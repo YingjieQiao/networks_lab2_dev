@@ -1,2 +1,2 @@
-GET http://127.0.0.1:8000/student_all HTTP/1.1
+GET http://127.0.0.1:8000/student?sort_by=gpa HTTP/1.1
 

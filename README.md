@@ -51,8 +51,8 @@ psql networks_lab2 -U networks_lab2_user
 | GET `heartbeat` | returns a string "The connection is up" | 200 if success |  --- | --- |
 | POST `/course` | creates a new `Course` in the table `Course` |  200 if successfully created | 400 if already exists | --- |
 | POST `/student` | creates a new `Student` in the table `Student` | 200 if successfully created | 400 if already exists | --- |
-| GET `course_all` | returns all rows in table `Course` | 200 if success | 500 for unexpected server side errors | --- |
-| GET `student_all` | returns all rows in table `Student` | 200 if success | 500 for unexpected server side errors | --- |
+| GET `/course` | returns all rows in table `Course` | 200 if success | 500 for unexpected server side errors | --- |
+| GET `/student` | returns all rows in table `Student` | 200 if success | 500 for unexpected server side errors | --- |
 | GET `/course/{course_id}` | get a new `Course` in the table `Course` given a `course_id` | 200 if successfully retrieved | 404 if not found | --- |
 | GET `/student/{student_id}` | get a new `Student` in the table `Student` given a `student_id` |200 if successfully retrieved | 404 if not found | --- |
 | DELETE `/course` | delete the specified `Course` in the payload from the table `Course` |  200 if successfully deleted | 404 if not found | --- |
@@ -80,13 +80,15 @@ psql networks_lab2 -U networks_lab2_user
             - schema vs attributes ?
         - show that the resource has indeed been created through another HTTP request
         - has validation and returns an appropriate HTTP response code if the input data is invalid (e.g. missing name)
-            - see GET `/course/{course_id}`, GET `/student/{student_id}` (TODO: 400 for bad request input)
+            - see GET `/course/{course_id}`, GET `/student/{student_id}` 
+            (TODO: 400 for bad request input, changeto get by name cos you dont know id)
     - either a DELETE or PUT request...
         - that deletes or updates a _single_ resource respectively
         - show that the resource has indeed been modified through another HTTP request 
         = has validation and returns an appropiate HTTP response code if the input data is invalid 
         (e.g. trying to delete a nonexistent user)
             - see DELETE `/course`, DELETE `/student`, PUT `/course/{course_id}/{student_id}`
+            - see docs positive cases negative cases blahblah
 - Identify which routes in your application are _idempotent_, and provide proof to support your answer.
 - Implement at least two of the following challenges:
     - File upload in a POST request, using multipart/form-data
