@@ -35,3 +35,9 @@ def test_get_student_limit_sort_by():
     response = client.get("/student?sort_by=gpa&limit=5")
     print(response.text)
     assert response.status_code == 200
+
+
+def test_get_student_by_name():
+    response = client.get("/student/Jon%20Snow")
+    print(response.text)
+    assert response.status_code == 200
