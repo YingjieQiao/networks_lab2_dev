@@ -31,12 +31,12 @@ class Course(Base):
     # enrolled_students = relationship("Student", back_populates="courses")
 
 
-class Image(Base):
+class File(Base):
     """
     standalone table for images
     """
 
-    __tablename__ = "image"
+    __tablename__ = "file"
 
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)

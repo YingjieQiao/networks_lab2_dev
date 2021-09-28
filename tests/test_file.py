@@ -1,4 +1,3 @@
-from fastapi import Path
 from fastapi.testclient import TestClient
 import json, os
 
@@ -10,17 +9,15 @@ UPLOAD_SUCCESS = "chinese_meme_1.png"
 
 
 def test_upload():
-    path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                        "assets", "images", UPLOAD_SUCCESS)
-    target_endpoint = "/image/" + UPLOAD_SUCCESS
-    with open(path, "rb") as file:
-        response = client.post(target_endpoint,
-                               files={"uploaded_file": (UPLOAD_SUCCESS, file, "image/png")})
-        assert response.status_code == 200
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", UPLOAD_SUCCESS)
+    files = {"uploaded_file": (UPLOAD_SUCCESS, open(path, "rb"), "multipart/form-data")}
+    response = client.post("/file", files=files)
+    assert response.status_code == 200
 
 
 def test_download():
-    target_endpoint = os.path.join("/image/", UPLOAD_SUCCESS)
+    target_endpoint = os.path.join("/file", UPLOAD_SUCCESS)
     response = client.get(target_endpoint)
     print(response.text)
+    print(response)
     assert response.status_code == 200

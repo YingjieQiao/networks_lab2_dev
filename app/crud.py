@@ -116,30 +116,16 @@ def get_all_student(db: Session, sort_by: Optional[str] = None,
         raise Exception("error in query")
 
 
-def get_image_row(db: Session, name: str):
-    return db.query(models.Image).filter(models.Image.name == name).first()
+def get_file_row(db: Session, name: str):
+    return db.query(models.File).filter(models.File.name == name).first()
 
 
-def create_image_row(db: Session, name: str):
-    db_image = models.Student(name=name)
+def create_file_row(db: Session, name: str):
+    db_file = models.File(name=name)
     # dont need to check duplicates
-    db.add(db_image)
+    db.add(db_file)
     db.commit()
-    db.refresh(db_image)
+    db.refresh(db_file)
 
     return True
-
-
-# def create_image(db: Session, name: str, encoded_img_string: str):
-#     # TODO: check if exists
-#     db_image = models.Image(name=name, image_base64str=encoded_img_string)
-#     db.add(db_image)
-#     db.commit()
-#     db.refresh(db_image)
-#
-#     return db_image
-#
-#
-# def get_image(db: Session, name: str):
-#     return db.query(models.Image).filter(models.Image.name == name).first()
 

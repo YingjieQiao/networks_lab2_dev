@@ -1,7 +1,8 @@
 from typing import List, Optional
-import os, base64
+import os, base64, shutil
 
 from fastapi import Depends, FastAPI, HTTPException, UploadFile, File
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from . import crud, models, schemas
@@ -126,33 +127,40 @@ def get_student_by_id(student_id: int, db: Session = Depends(get_db)):
     return db_student
 
 
+@app.post("/file", status_code=200)
+def upload_image(uploaded_file: UploadFile = File(...), db: Session = Depends(get_db)):
+    filename = uploaded_file.filename
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "object_store", filename)
 
-
-
-@app.post("/image/{filename}", status_code=200)
-def upload_image(filename: str, uploaded_file: bytes = File(...), db: Session = Depends(get_db)):
-    path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                        "object_store", filename)
-    db_image = crud.get_image_row(db, filename)
-    if db_image:
+    db_file = crud.get_file_row(db, filename)
+    if db_file:
         raise HTTPException(status_code=400, detail="A file with the same filename already exists.")
     try:
-        crud.create_image_row(db, filename)
+        crud.create_file_row(db, filename)
     except:
         raise HTTPException(status_code=500, detail="database query error")
 
     try:
-        with open(path, "wb+") as img:
+        with open(path, "wb+") as file_object:
             # practically, should be an object store service like AWS S3
-            img.write(uploaded_file)
+            shutil.copyfileobj(uploaded_file.file, file_object)
     except:
-        raise HTTPException(status_code=500, detail="writing to servere disk error")
+        raise HTTPException(status_code=500, detail="writing to server disk error")
 
     return True
 
 
+@app.get("/file/{filename}", status_code=200)
+def download_image(filename: str, db: Session = Depends(get_db)):
+    db_file = crud.get_file_row(db, filename)
+    if db_file is None:
+        raise HTTPException(status_code=404, detail="File not found")
 
-# cannot use plaintext, must use multimedia/form
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "object_store", filename)
+    return FileResponse(path)
+
+
+# cannot use plaintext, must use multipart/form-data
 # @app.post("/image/{filename}", response_model=schemas.Image, status_code=200)
 # def upload_image_to_db(filename: str, db: Session = Depends(get_db)):
 #     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "images", filename)
@@ -173,17 +181,6 @@ def upload_image(filename: str, uploaded_file: bytes = File(...), db: Session = 
 #     image_to_render = """<div><p>Rendered image</p><img src={0} alt={1} /></div>"""\
 #         .format("data:image/jpeg;base64,"+db_image.image_base64str, db_image.name)
 #     return image_to_render
-
-
-# @app.get("/course/", response_model=List[schemas.User])
-# def read_course(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-#     course = crud.get_course(db, skip=skip, limit=limit)
-#     return course
-
-# @app.get("/items/", response_model=List[schemas.Item])
-# def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-#     items = crud.get_items(db, skip=skip, limit=limit)
-#     return items
 
 
 #

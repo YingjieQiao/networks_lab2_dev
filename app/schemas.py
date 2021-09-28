@@ -37,16 +37,16 @@ class Course(CourseBase):
         orm_mode = True
 
 
-class ImageBase(BaseModel):
+class FileBase(BaseModel):
     name: str
     # image_base64str: str
 
 
-class ImageCreate(ImageBase):
+class FileCreate(FileBase):
     pass
 
 
-class Image(ImageBase):
+class File(FileBase):
     id: int
 
     class Config:
