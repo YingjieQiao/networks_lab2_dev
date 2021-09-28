@@ -90,6 +90,10 @@ def get_student_by_id(db: Session, student_id: int):
     return db.query(models.Student).filter(models.Student.id == student_id).first()
 
 
+def get_student_by_name(db: Session, student_name: str):
+    return db.query(models.Student).filter(models.Student.name == student_name).first()
+
+
 def get_all_course(db: Session):
     try:
         return db.query(models.Course).all()
@@ -99,17 +103,17 @@ def get_all_course(db: Session):
 
 def get_all_student(db: Session, sort_by: Optional[str] = None,
                     limit: Optional[int] = None, offset: Optional[int] = None):
-    # try:
-    db_student = db.query(models.Student)
-    if sort_by is not None:
-        db_student = db_student.order_by(sort_by)
-    if limit is not None:
-        db_student = db_student.limit(limit)
-    if offset is not None:
-        db_student = db_student.offset(offset)
-    return db_student.all()
-    # except:
-    #     raise Exception("error in query")
+    try:
+        db_student = db.query(models.Student)
+        if sort_by is not None:
+            db_student = db_student.order_by(sort_by)
+        if limit is not None:
+            db_student = db_student.limit(limit)
+        if offset is not None:
+            db_student = db_student.offset(offset)
+        return db_student.all()
+    except:
+        raise Exception("error in query")
 
 
 def get_image_row(db: Session, name: str):

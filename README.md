@@ -79,8 +79,8 @@ psql networks_lab2 -U networks_lab2_user
             - see POST `/course`, POST `/student`, to create with attributes
             - schema vs attributes ?
         - show that the resource has indeed been created through another HTTP request
+            - see GET `/course/{course_name}` and GET `/student/{student_name}`
         - has validation and returns an appropriate HTTP response code if the input data is invalid (e.g. missing name)
-            - see GET `/course/{course_id}`, GET `/student/{student_id}` 
             (TODO: 400 for bad request input, changeto get by name cos you dont know id)
     - either a DELETE or PUT request...
         - that deletes or updates a _single_ resource respectively

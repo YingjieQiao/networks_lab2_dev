@@ -87,10 +87,10 @@ def get_course(db: Session = Depends(get_db)):
 @app.get("/student", response_model=List[schemas.Student], status_code=200)
 def get_student(sort_by: Optional[str] = None, limit: Optional[int] = None,
                 offset: Optional[int] = None, db: Session = Depends(get_db),):
-    # try:
-    students = crud.get_all_student(db, sort_by, limit, offset)
-    # except:
-    #     raise HTTPException(status_code=500, detail="unexpected error in query")
+    try:
+        students = crud.get_all_student(db, sort_by, limit, offset)
+    except:
+        raise HTTPException(status_code=500, detail="unexpected error in query")
     return students
 
 
@@ -105,6 +105,22 @@ def get_course_by_id(course_id: int, db: Session = Depends(get_db)):
 @app.get("/student/{student_id}", response_model=schemas.Student, status_code=200)
 def get_student_by_id(student_id: int, db: Session = Depends(get_db)):
     db_student = crud.get_student_by_id(db, student_id)
+    if db_student is None:
+        raise HTTPException(status_code=404, detail="Student not found")
+    return db_student
+
+
+@app.get("/course/{course_name}", response_model=schemas.Course, status_code=200)
+def get_course_by_name(student_name: str, db: Session = Depends(get_db)):
+    db_student = crud.get_student_by_name(db, student_name)
+    if db_student is None:
+        raise HTTPException(status_code=404, detail="Student not found")
+    return db_student
+
+
+@app.get("/student/{student_name}", response_model=schemas.Student, status_code=200)
+def get_student_by_name(student_name: str, db: Session = Depends(get_db)):
+    db_student = crud.get_student_by_name(db, student_name)
     if db_student is None:
         raise HTTPException(status_code=404, detail="Student not found")
     return db_student
