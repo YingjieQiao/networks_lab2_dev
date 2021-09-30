@@ -1,23 +1,30 @@
 version: "3"
 
 services:
-  redis:
-    image: redis
-  redis_commander:
-    image: rediscommander/redis-commander
-    ports:
-      - "8081:8081"
+  db:
+    image: postgres:13-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
     environment:
-      - REDIS_HOST=redis
-      - PORT=8081
-    depends_on:
-      - redis
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+
   rest_api:
     build: .
-    command: /start-reload.sh
+    command: uvicorn app.main:app --host 0.0.0.0
+    env_file:
+      - ./.env
     volumes:
-      - ./app:/app
+      - .:/app
     ports:
-      - "8000:80"
+      - "8000:8000"
     depends_on:
-      - redis
+      - db
+
+
+
+volumes:
+  postgres_data:

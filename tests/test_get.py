@@ -8,13 +8,18 @@ client = TestClient(application)
 
 
 def test_get_student_all():
-    response = client.get("/student")
+    response = client.get("/student", headers={"X-Token": "my_nonna"})
     print(response.text)
     assert response.status_code == 200
 
 
+def test_get_course_all():
+    response = client.get("/course", headers={"X-Token": "my_nonna"})
+    print(response.text)
+    assert response.status_code == 200
+
 def test_get_student_sort_by():
-    response = client.get("/student?sort_by=gpa")
+    response = client.get("/student?sort_by=gpa", headers={"X-Token": "my_nonna"})
     print(response.text)
     assert response.status_code == 200
 

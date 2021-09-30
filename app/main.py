@@ -5,14 +5,16 @@ from functools import wraps
 from fastapi import Depends, FastAPI, HTTPException, UploadFile, File, Request, Header
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
+from dotenv import load_dotenv
 
 from . import crud, models, schemas
 from .database import SessionLocal, engine
 
 models.Base.metadata.create_all(bind=engine)
+load_dotenv()
 
 app = FastAPI()
-SECRET_KEY = "123"
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 
 # Dependency
