@@ -7,7 +7,10 @@ from . import models, schemas
 
 
 def create_course(db: Session, course: schemas.CourseCreate):
-    # TODO: check if exists
+    existing_course = get_course_by_name(db, course.title)
+    if existing_course:
+        return existing_course
+
     db_course = models.Course(title=course.title, description=course.description)
     db.add(db_course)
     db.commit()
@@ -17,7 +20,10 @@ def create_course(db: Session, course: schemas.CourseCreate):
 
 
 def create_student(db: Session, student: schemas.StudentCreate):
-    # TODO: check if exists
+    existing_student = get_student_by_name(db, student.name)
+    if existing_student:
+        return existing_student
+
     db_student = models.Student(name=student.name, email=student.email, gpa=student.gpa)
     db.add(db_student)
     db.commit()
@@ -94,6 +100,9 @@ def get_student_by_id(db: Session, student_id: int):
 def get_student_by_name(db: Session, student_name: str):
     return db.query(models.Student).filter(models.Student.name == student_name).first()
 
+
+def get_course_by_name(db: Session, course_name: str):
+    return db.query(models.Course).filter(models.Course.title == course_name).first()
 
 def get_all_course(db: Session):
     try:

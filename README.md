@@ -16,7 +16,7 @@ Using FastAPI and PostgreSQL. This implements a student - course system where ea
 a student can have at most 1 course. (see a command-line illustration of the one-to-many relationship [here](one2many.md)),
 and a gallery to showcase some beautiful images.
 
-### To run the API server locally
+### Run the API server locally
 
 run the following:
 
@@ -48,7 +48,7 @@ psql networks_lab2 -U networks_lab2_user
 
 | endpoint   | description        | Success  |  Failure  | Remarks  |
 | --- | --- | --- | --- | --- |
-| GET `heartbeat` | returns a string "The connection is up" | 200 if success |  --- | --- |
+| GET `/heartbeat` | returns a string "The connection is up" | 200 if success |  --- | --- |
 | POST `/course` | creates a new `Course` in the table `Course` |  200 if successfully created | 400 if already exists | --- |
 | POST `/student` | creates a new `Student` in the table `Student` | 200 if successfully created | 400 if already exists | --- |
 | GET `/course` | returns all rows in table `Course` | 200 if success | 500 for unexpected server side errors | --- |
@@ -64,24 +64,56 @@ psql networks_lab2 -U networks_lab2_user
 
 - A REST-over-HTTP API written in any programming language, in any framework, to imitate any real life service (e.g. fake myportal, fake edimension), backed with any other supporting services (redis, mysql, etc):
     - Can be deployed on any docker host using `docker compose` - you fail if I need to install any other dependencies on my computer!
+        - see the [Run the API server locally](#run-the-api-server-locally) section above. 
+        - In short, run `docker-compose up` at project root folder, and then attach to the FastAPI container.
+  
+
+*Please run the `POST` requests first to populate the database table, then run the `GET` requests, following the sequence below.*
+
+Running the tests with `pytest testfile.py::test_function -s`, with `-s` to capture stdout in terminal:
+
+- a POST request ...
+    - that creates a new resource with the given attributes in the body
+        - POST `/course`, POST `/student`
+        - valid requests: 
+        ```bash
+        pytest tests/test_create.py::test_create_student_success -s
+        pytest tests/test_create.py::test_create_course_success -s
+        ```
+        - invalid requests:
+        row already exists
+        ```bash
+        pytest tests/test_create.py::test_create_student_fail_1 -s
+        ```
+        bad input ioshfkswhgvlaewrhgoinwoigvsogbfaiohbg;oiaehwo;ighaewr;oighoi
+        ```bash
+        pytest tests/test_create.py::test_create_course_fail_1 -s
+        ```
+
+    - show that the resource has indeed been created through another HTTP request
+        - GET `/course/{course_name}` and GET `/student/{student_name}`
+        - valid requests: 
+        ```bash
+        pytest tests/test_get.py::test_get_student_by_name -s
+        pytest tests/test_get.py::test_get_course_by_name -s
+        ```
+      
+    - has validation and returns an appropriate HTTP response code if the input data is invalid 
+    (e.g. missing name)
+        - see the invalid requests stated above.
+
+- a GET request ...
+    - with no query parameters
+        - see GET `heartbeat`, GET `course_all` and GET `student_all` (db optional query param ok ??? gist link)
+    - with a `sortBy` query parameter, to transform the order of the items returned
+        - up to you to decide what attributes can be sorted
+    - with a `count` query parameter, to limit the number of items returned
+    - with a `offset` query parameter, to "skip" ahead by a number of items
+    - with any combination of the above query parameters
+        
 - With accompanying `.http` unit test files, showcasing your API's ability to respond to:
-    - a GET request ...
-        - with no query parameters
-            - see GET `heartbeat`, GET `course_all` and GET `student_all` (db optional query param ok ??? gist link)
-        - with a `sortBy` query parameter, to transform the order of the items returned
-            - up to you to decide what attributes can be sorted
-        - with a `count` query parameter, to limit the number of items returned
-        - with a `offset` query parameter, to "skip" ahead by a number of items
-        - with any combination of the above query parameters
-    - a POST request ...
-        - that creates a new resource with the given attributes in the body
-            - see POST `/course`, POST `/student`, to create with scheme
-            - see POST `/course`, POST `/student`, to create with attributes
-            - schema vs attributes ?
-        - show that the resource has indeed been created through another HTTP request
-            - see GET `/course/{course_name}` and GET `/student/{student_name}`
-        - has validation and returns an appropriate HTTP response code if the input data is invalid (e.g. missing name)
-            (TODO: 400 for bad request input, changeto get by name cos you dont know id)
+
+    
     - either a DELETE or PUT request...
         - that deletes or updates a _single_ resource respectively
         - show that the resource has indeed been modified through another HTTP request 
@@ -89,10 +121,19 @@ psql networks_lab2 -U networks_lab2_user
         (e.g. trying to delete a nonexistent user)
             - see DELETE `/course`, DELETE `/student`, PUT `/course/{course_id}/{student_id}`
             - see docs positive cases negative cases blahblah
-- Identify which routes in your application are _idempotent_, and provide proof to support your answer.
+- Identify which routes in your application are _idempotent_, 
+and provide proof to support your answer.
+    - `PUT /course/{course_id}/{student_id}` is idempotent: 
+    calling it once or several times successively has the same effect (that is no side effect). 
+    For example, calling `PUT /course/1/1` will make sure the `Student` with `student_id = 1` 
+    is under `Course` with `course_id = 1` and that `Course` with `course_id = 1` 
+    will have `Student` with `student_id = 1` in its `enrolled_student` - calling multiple times
+    will have the same effect as calling it once. 
+    
 - Implement at least two of the following challenges:
     - File upload in a POST request, using multipart/form-data
-        - see POST `/file`. To my knowledge, I think the best way to store large binary assets like image and video is to
+        - see POST `/file`. run `blah`, expected output in terminal: `blah` 
+        - A side note: To my knowledge, I think the best way to store large binary assets like image and video is to
         save them to an Object Store service like AWS S3, or a base64 string in the database table (for images), or save a path to the asset in the database table and keep
         the asset somewhere on the disk, which is more efficient. For simplicity, I am saving the images here to a 
         server disk. 

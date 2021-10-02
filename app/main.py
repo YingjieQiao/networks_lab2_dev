@@ -113,11 +113,12 @@ def get_student(sort_by: Optional[str] = None, limit: Optional[int] = None,
 
 @app.get("/course/{course_name}", dependencies=[Depends(check_request_header)],
          response_model=schemas.Course, status_code=200)
-def get_course_by_name(student_name: str, db: Session = Depends(get_db)):
-    db_student = crud.get_student_by_name(db, student_name)
-    if db_student is None:
-        raise HTTPException(status_code=404, detail="Student not found")
-    return db_student
+def get_course_by_name(course_name: str, db: Session = Depends(get_db)):
+    db_course = crud.get_course_by_name(db, course_name)
+    if db_course is None:
+        raise HTTPException(status_code=404, detail="Course not found")
+    print(db_course)
+    return db_course
 
 
 @app.get("/student/{student_name}", dependencies=[Depends(check_request_header)],
