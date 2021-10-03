@@ -35,7 +35,8 @@ def create_student(db: Session, student: schemas.StudentCreate):
 def delete_course(db: Session, course: schemas.CourseCreate):
     affected_rows = get_course(db, course)
     if not affected_rows:
-        raise Exception("Trying to delete nonexistent rows")
+        return affected_rows
+        # raise Exception("Trying to delete nonexistent rows")
     db.delete(affected_rows)
     db.commit()
 
@@ -45,7 +46,8 @@ def delete_course(db: Session, course: schemas.CourseCreate):
 def delete_student(db: Session, student: schemas.StudentCreate):
     affected_rows = get_student(db, student)
     if not affected_rows:
-        raise Exception("Trying to delete nonexistent rows")
+        return affected_rows
+        # raise Exception("Trying to delete nonexistent rows")
     db.delete(affected_rows)
     db.commit()
 
@@ -104,6 +106,7 @@ def get_student_by_name(db: Session, student_name: str):
 def get_course_by_name(db: Session, course_name: str):
     return db.query(models.Course).filter(models.Course.title == course_name).first()
 
+
 def get_all_course(db: Session):
     try:
         return db.query(models.Course).all()
@@ -146,4 +149,3 @@ def batch_update_student_gpa(db: Session, threshold: float, delta: float):
     db.commit()
 
     return updated_rows_count
-

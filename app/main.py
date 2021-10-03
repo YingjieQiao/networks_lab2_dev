@@ -102,10 +102,10 @@ def get_course(db: Session = Depends(get_db)):
 
 @app.get("/student", dependencies=[Depends(check_request_header)],
          response_model=List[schemas.Student], status_code=200)
-def get_student(sort_by: Optional[str] = None, limit: Optional[int] = None,
+def get_student(sort_by: Optional[str] = None, count: Optional[int] = None,
                 offset: Optional[int] = None, db: Session = Depends(get_db)):
     try:
-        students = crud.get_all_student(db, sort_by, limit, offset)
+        students = crud.get_all_student(db, sort_by, count, offset)
     except:
         raise HTTPException(status_code=500, detail="unexpected error in query")
     return students
@@ -168,7 +168,7 @@ def upload_image(uploaded_file: UploadFile = File(...), db: Session = Depends(ge
     except:
         raise HTTPException(status_code=500, detail="writing to server disk error")
 
-    return True
+    return path
 
 
 @app.get("/file/{filename}", dependencies=[Depends(check_request_header)], status_code=200)

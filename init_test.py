@@ -1,3 +1,10 @@
+from fastapi.testclient import TestClient
+import json
+from app.main import app as application
+
+client = TestClient(application)
+
+
 students = [
     {
         "name": "Walter White",
@@ -5,7 +12,7 @@ students = [
         "gpa": 5.3
     },
     {
-        "name": "Jess Pinkman",
+        "name": "Jesse Pinkman",
         "email": "jess_pinkman@sutd.edu",
         "gpa": 0.5
     },
@@ -20,8 +27,8 @@ students = [
         "gpa": 4.5
     },
     {
-        "name": "Jane Ded",
-        "email": "jane_ded@sutd.edu",
+        "name": "Stannis Bar",
+        "email": "stannis_bar@sutd.edu",
         "gpa": 2.5
     },
     {
@@ -51,7 +58,20 @@ courses = [
         "description": "use jupyter notebook"
     },
     {
-        "title": "Computation Strucutrues",
+        "title": "Computation Structures",
         "description": "most difficult module in ISTD"
     }
 ]
+
+
+def populate_table():
+    for student in students:
+        client.post("/student", data=json.dumps(student),
+                    headers={"X-Token": "my_nonna"})
+    for course in courses:
+        client.post("/course", data=json.dumps(course),
+                    headers={"X-Token": "my_nonna"})
+
+
+if __name__ == "__main__":
+    populate_table()

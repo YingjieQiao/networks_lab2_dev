@@ -18,14 +18,15 @@ def test_get_course_all():
     print(response.text)
     assert response.status_code == 200
 
+
 def test_get_student_sort_by():
     response = client.get("/student?sort_by=gpa", headers={"X-Token": "my_nonna"})
     print(response.text)
     assert response.status_code == 200
 
 
-def test_get_student_limit():
-    response = client.get("/student?limit=3", headers={"X-Token": "my_nonna"})
+def test_get_student_count():
+    response = client.get("/student?count=3", headers={"X-Token": "my_nonna"})
     print(response.text)
     assert response.status_code == 200
 
@@ -37,18 +38,42 @@ def test_get_student_offset():
 
 
 def test_get_student_limit_sort_by():
-    response = client.get("/student?sort_by=gpa&limit=5", headers={"X-Token": "my_nonna"})
+    response = client.get("/student?sort_by=gpa&count=5", headers={"X-Token": "my_nonna"})
     print(response.text)
     assert response.status_code == 200
 
 
 def test_get_student_by_name():
-    response = client.get("/student/Walter%20White", headers={"X-Token": "my_nonna"})
+    response = client.get("/student/Samwell%20Tarly", headers={"X-Token": "my_nonna"})
     print(response.text)
     assert response.status_code == 200
 
 
 def test_get_course_by_name():
-    response = client.get("/course/Intro%20to%20Algo", headers={"X-Token": "my_nonna"})
+    response = client.get("/course/Discrete%20Math", headers={"X-Token": "my_nonna"})
+    print(response.text)
+    assert response.status_code == 200
+
+
+def test_get_student_by_name_for_delete():
+    response = client.get("/student/Samwell%20Tarly", headers={"X-Token": "my_nonna"})
+    print(response.text)
+    assert response.status_code == 404
+
+
+def test_get_course_by_name_for_delete():
+    response = client.get("/course/Discrete%20Math", headers={"X-Token": "my_nonna"})
+    print(response.text)
+    assert response.status_code == 404
+
+
+def test_get_course_by_id():
+    response = client.get("/course/byid/1", headers={"X-Token": "my_nonna"})
+    print(response.text)
+    assert response.status_code == 200
+
+
+def test_get_student_by_id():
+    response = client.get("/student/byid/1", headers={"X-Token": "my_nonna"})
     print(response.text)
     assert response.status_code == 200
