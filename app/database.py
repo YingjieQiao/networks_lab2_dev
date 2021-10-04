@@ -44,8 +44,8 @@ def wait_for_db(db_uri):
         time.sleep(2)
 
 
-# SQLALCHEMY_DATABASE_URI = "postgresql://postgres:postgres@db:5432/postgres"
-SQLALCHEMY_DATABASE_URI = "postgresql://networks_lab2_user:123456@localhost:5432/networks_lab2"
+SQLALCHEMY_DATABASE_URI = "postgresql://postgres:postgres@db:5432/postgres"
+# SQLALCHEMY_DATABASE_URI = "postgresql://networks_lab2_user:123456@localhost:5432/networks_lab2"
 
 wait_for_db(SQLALCHEMY_DATABASE_URI)
 

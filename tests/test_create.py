@@ -43,6 +43,7 @@ def test_create_student_fail_1():
 
     response = client.post("/student", data=json.dumps(CREATE_STUDENT_SUCCESS),
                            headers={"X-Token": "my_nonna"})
+    print(response.text)
     assert response.status_code == 400
 
 
