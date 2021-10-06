@@ -2,8 +2,8 @@ POST http://127.0.0.1:8000/course HTTP/1.1
 Content-Type: application/json
 
 {
-    "title": "Intro to Algo",
-    "description": "leetcode"
+    "title": "ev",
+  "description": "souhf"
 }
 
 

@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError, validator
 
 
 class StudentBase(BaseModel):
@@ -12,6 +12,7 @@ class StudentBase(BaseModel):
 class StudentCreate(StudentBase):
     pass
 
+
 class Student(StudentBase):
     id: int
     course_id: Optional[int]
@@ -22,7 +23,7 @@ class Student(StudentBase):
 
 class CourseBase(BaseModel):
     title: str
-    description: Optional[str] = None
+    description: str
 
 
 class CourseCreate(CourseBase):

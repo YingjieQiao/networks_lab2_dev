@@ -48,9 +48,15 @@ def test_create_student_fail_1():
 
 
 def test_create_course_fail_1():
+    """
+    bad input
+    """
+
     response = client.post("/course", data=json.dumps(CREATE_COURSE_FAIL_1),
                            headers={"X-Token": "my_nonna"})
-    assert response.status_code == 400
+    print(response.text)
+    assert response.status_code == 422
+
 
 
 

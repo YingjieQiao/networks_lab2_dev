@@ -43,7 +43,10 @@ def create_course(course: schemas.CourseCreate, db: Session = Depends(get_db)):
     db_course = crud.get_course(db, course=course)
     if db_course:
         raise HTTPException(status_code=400, detail="This course has already been created.")
-    return crud.create_course(db=db, course=course)
+    try:
+        return crud.create_course(db=db, course=course)
+    except:
+        raise HTTPException(status_code=400, detail="Bad request body")
 
 
 @app.delete("/course", dependencies=[Depends(check_request_header)],

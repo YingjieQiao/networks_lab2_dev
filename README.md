@@ -4,11 +4,6 @@ Qiao Yingjie
 
 1004514
 
-TODO:
-
-1. docker script
-2. validate post body
-3. do the tests in docker and check the stdout and id for the get endpoints
 
 ## Intro
 
@@ -26,6 +21,20 @@ Run the API server and database service with containers locally.
     docker-compose build
     docker-compose up
     ```
+   
+   Wait until both `db` and `rest_api` are up and running,
+   
+   ```bash
+    db_1        | 2021-10-06 13:23:38.591 UTC [47] LOG:  database system was shut down at 2021-10-06 13:23:38 UTC
+    db_1        | 2021-10-06 13:23:38.604 UTC [1] LOG:  database system is ready to accept connections
+    rest_api_1  | INFO:     Started server process [1]
+    rest_api_1  | INFO:     Waiting for application startup.
+    rest_api_1  | INFO:     Application startup complete.
+    rest_api_1  | INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+
+   ```
+   
+   then proceed to then next step to go into the container.
 
 2. Find the container IDs
 
@@ -128,7 +137,9 @@ docker-compose down --volumes
 Please run `python init_test.py` to populate the tables with some initial rows as shown in 
 the [Setup](#setup) section above, so that the `GET` endpoints could work.
 
-Running the tests with `pytest testfile.py::test_function -s`, with `-s` to capture stdout in terminal.
+Running the tests with `pytest testfile.py::test_function -s`, with `-s` to capture stdout in terminal. All `pytest`
+ commands should be run in the `rest_api` container and the commands that check the database tables should be run in the
+  `db` container.
 
 With accompanying `pytest` unit test files, showcasing your API's ability to respond to:
 
@@ -143,8 +154,8 @@ With accompanying `pytest` unit test files, showcasing your API's ability to res
         - expected stdout:
             ```bash
             collected 1 item                                                                                                                                                                                                                                                                                    
-    
-            tests/test_get.py [{"name":"Walter White","email":"walter_white@sutd.edu","gpa":5.3,"id":1,"course_id":null},{"name":"Jesse Pinkman","email":"jess_pinkman@sutd.edu","gpa":0.5,"id":2,"course_id":null},{"name":"Gus String","email":"gus_string@sutd.edu","gpa":4.5,"id":3,"course_id":null},{"name":"Hank Schrader","email":"hank_schrader@sutd.edu","gpa":4.5,"id":4,"course_id":null},{"name":"Stannis Bar","email":"stannis_bar@sutd.edu","gpa":2.5,"id":5,"course_id":null},{"name":"Jon Snow","email":"jon_snow@sutd.edu","gpa":2.0,"id":6,"course_id":null},{"name":"Tyrion Lannister","email":"tyrion_lanniester@sutd.edu","gpa":5.0,"id":7,"course_id":null},{"name":"Cersei Lannister","email":"cersei_lannister@sutd.edu","gpa":1.0,"id":8,"course_id":null}]
+
+            tests/test_get.py [{"name":"Walter White","email":"walter_white@sutd.edu","gpa":5.3,"id":1,"course_id":null},{"name":"Jesse Pinkman","email":"jess_pinkman@sutd.edu","gpa":0.5,"id":2,"course_id":null},{"name":"Gus String","email":"gus_string@sutd.edu","gpa":4.5,"id":3,"course_id":null},{"name":"Hank Schrader","email":"hank_schrader@sutd.edu","gpa":4.5,"id":4,"course_id":null},{"name":"Stannis Bar","email":"stannis_bar@sutd.edu","gpa":2.5,"id":5,"course_id":null},{"name":"Jon Snow","email":"jon_snow@sutd.edu","gpa":2.0,"id":6,"course_id":null},{"name":"Tyrion Lannister","email":"tyrion_lanniester@sutd.edu","gpa":5.0,"id":7,"course_id":null},{"name":"Cersei Lannister","email":"cersei_lannister@sutd.edu","gpa":1.0,"id":8,"course_id":null}]                                                                                                                                                                                                                                                                           
             ```
       
         - make the request:
@@ -154,8 +165,8 @@ With accompanying `pytest` unit test files, showcasing your API's ability to res
         - expected stdout:
             ```bash
             collected 1 item                                                                                                                                                                                                                                                                                    
-    
-            tests/test_get.py [{"title":"Intro to Algo","description":"leetcode","id":1,"enrolled_students":[]},{"title":"Digital World","description":"use jupyter notebook","id":2,"enrolled_students":[]},{"title":"Computation Structures","description":"most difficult module in ISTD","id":3,"enrolled_students":[]}]
+
+            tests/test_get.py [{"title":"Intro to Algo","description":"leetcode","id":1,"enrolled_students":[]},{"title":"Digital World","description":"use jupyter notebook","id":2,"enrolled_students":[]},{"title":"Computation Structures","description":"most difficult module in ISTD","id":3,"enrolled_students":[]}]                                                                                                                                                                                                                                                                                    
             ```
       
     - with a `sortBy` query parameter, to transform the order of the items returned
@@ -167,7 +178,7 @@ With accompanying `pytest` unit test files, showcasing your API's ability to res
         - expected stdout:
             ```bash
             collected 1 item                                                                                                                                                                                                                                                                                    
-    
+
             tests/test_get.py [{"name":"Jesse Pinkman","email":"jess_pinkman@sutd.edu","gpa":0.5,"id":2,"course_id":null},{"name":"Cersei Lannister","email":"cersei_lannister@sutd.edu","gpa":1.0,"id":8,"course_id":null},{"name":"Jon Snow","email":"jon_snow@sutd.edu","gpa":2.0,"id":6,"course_id":null},{"name":"Stannis Bar","email":"stannis_bar@sutd.edu","gpa":2.5,"id":5,"course_id":null},{"name":"Hank Schrader","email":"hank_schrader@sutd.edu","gpa":4.5,"id":4,"course_id":null},{"name":"Gus String","email":"gus_string@sutd.edu","gpa":4.5,"id":3,"course_id":null},{"name":"Tyrion Lannister","email":"tyrion_lanniester@sutd.edu","gpa":5.0,"id":7,"course_id":null},{"name":"Walter White","email":"walter_white@sutd.edu","gpa":5.3,"id":1,"course_id":null}]
             ```
       
@@ -180,7 +191,7 @@ With accompanying `pytest` unit test files, showcasing your API's ability to res
         - expected stdout:
             ```bash
             collected 1 item                                                                                                                                                                                                                                                                                    
-    
+
             tests/test_get.py [{"name":"Walter White","email":"walter_white@sutd.edu","gpa":5.3,"id":1,"course_id":null},{"name":"Jesse Pinkman","email":"jess_pinkman@sutd.edu","gpa":0.5,"id":2,"course_id":null},{"name":"Gus String","email":"gus_string@sutd.edu","gpa":4.5,"id":3,"course_id":null}]
             ```
       
@@ -193,7 +204,7 @@ With accompanying `pytest` unit test files, showcasing your API's ability to res
         - expected stdout:
             ```bash
             collected 1 item                                                                                                                                                                                                                                                                                    
-    
+
             tests/test_get.py [{"name":"Hank Schrader","email":"hank_schrader@sutd.edu","gpa":4.5,"id":4,"course_id":null},{"name":"Stannis Bar","email":"stannis_bar@sutd.edu","gpa":2.5,"id":5,"course_id":null},{"name":"Jon Snow","email":"jon_snow@sutd.edu","gpa":2.0,"id":6,"course_id":null},{"name":"Tyrion Lannister","email":"tyrion_lanniester@sutd.edu","gpa":5.0,"id":7,"course_id":null},{"name":"Cersei Lannister","email":"cersei_lannister@sutd.edu","gpa":1.0,"id":8,"course_id":null}]
             ```
       
@@ -206,7 +217,7 @@ With accompanying `pytest` unit test files, showcasing your API's ability to res
         - expected stdout:
             ```bash
             collected 1 item                                                                                                                                                                                                                                                                                    
-    
+
             tests/test_get.py [{"name":"Jesse Pinkman","email":"jess_pinkman@sutd.edu","gpa":0.5,"id":2,"course_id":null},{"name":"Cersei Lannister","email":"cersei_lannister@sutd.edu","gpa":1.0,"id":8,"course_id":null},{"name":"Jon Snow","email":"jon_snow@sutd.edu","gpa":2.0,"id":6,"course_id":null},{"name":"Stannis Bar","email":"stannis_bar@sutd.edu","gpa":2.5,"id":5,"course_id":null},{"name":"Hank Schrader","email":"hank_schrader@sutd.edu","gpa":4.5,"id":4,"course_id":null}]
             ```
 
@@ -281,7 +292,7 @@ With accompanying `pytest` unit test files, showcasing your API's ability to res
       
     - has validation and returns an appropriate HTTP response code if the input data is invalid 
     (e.g. missing name)
-        - invalid requests: row already exists. Make the same request again:
+        - invalid requests: row already exists. Try insert the same `Student` into table:
             ```bash
             pytest tests/test_create.py::test_create_student_fail_1 -s
             ```
@@ -308,15 +319,33 @@ With accompanying `pytest` unit test files, showcasing your API's ability to res
             (9 rows)
     
             ```
-        - invalid requestsbad input TODOTODOTODO `validator`
+        - invalid requests - missing name/field in the request body, using a Bad Request Body missing a necessary field:
+            ```json
+            CREATE_COURSE_FAIL_1 = {
+                "title": "missing description"
+            }
+            ``` 
+            To make the request:
             ```bash
             pytest tests/test_create.py::test_create_course_fail_1 -s
             ```
         - expected stdout:
             ```bash
-            later
+            collected 1 item                                                                                                                                                                                                                                                                                    
+
+            tests/test_create.py {"detail":[{"loc":["body","description"],"msg":"field required","type":"value_error.missing"}]}
             ```
-        - check database table: TODO
+        - check database table:
+            ```bash
+            postgres=# SELECT * FROM course;
+             id |         title          |          description          
+            ----+------------------------+-------------------------------
+              1 | Intro to Algo          | leetcode
+              2 | Digital World          | use jupyter notebook
+              3 | Computation Structures | most difficult module in ISTD
+              4 | Discrete Math          | sutd doesnt teach
+            (4 rows)
+            ```
         
 - either a DELETE or PUT request...
     - that deletes or updates a _single_ resource respectively
@@ -404,16 +433,8 @@ With accompanying `pytest` unit test files, showcasing your API's ability to res
               1 | Walter White     | walter_white@sutd.edu      | 5.3 |         1
             (8 rows)
             
-            postgres=# SELECT * FROM course;
-             id |         title          |          description          
-            ----+------------------------+-------------------------------
-              1 | Intro to Algo          | leetcode
-              2 | Digital World          | use jupyter notebook
-              3 | Computation Structures | most difficult module in ISTD
-            (3 rows)
 
             ```
-            (the `enrolled_students` is not included in the `Course` moedl and database table)
         
     - has validation and returns an appropiate HTTP response code if the input data is invalid 
     (e.g. trying to delete a nonexistent user)
@@ -498,6 +519,7 @@ and provide proof to support your answer.
     
             tests/test_file.py "/app/app/object_store/cat.png"
             ```
+        - And you can see a `cat.png` under `./app/object_store`.
         
         - A side note: To my knowledge, I think the best way to store large binary assets like image and video is to
         save them to an Object Store service like AWS S3, or a base64 string in the database table (for images), 

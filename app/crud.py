@@ -12,9 +12,12 @@ def create_course(db: Session, course: schemas.CourseCreate):
         return existing_course
 
     db_course = models.Course(title=course.title, description=course.description)
-    db.add(db_course)
-    db.commit()
-    db.refresh(db_course)
+    try:
+        db.add(db_course)
+        db.commit()
+        db.refresh(db_course)
+    except Exception as e:
+        print(e)
 
     return db_course
 
