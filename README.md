@@ -9,7 +9,9 @@ Qiao Yingjie
 
 Using FastAPI and PostgreSQL. This implements a student - course system where each course could enroll multiple students, but
 a student can have at most 1 course. (see a command-line illustration of the one-to-many relationship [here](./one2many.md)),
-and a gallery to showcase some beautiful images.
+and a gallery to showcase some beautiful images. 
+
+There are 3 tables in the database and all 3 do not allow duplicated rows.
 
 ## Setup
 
@@ -504,6 +506,132 @@ and provide proof to support your answer.
         tests/test_put.py {"name":"Walter White","email":"walter_white@sutd.edu","gpa":5.3,"id":1,"course_id":1}
         ```
     which is the same result as making the request only once.
+    
+    - All GET endpoints are idempotent. The GET requests do not modify any resources on the server
+    or editing the database entries. Running the GET requests multiple times 
+    will get the same answer.
+    
+    - Both the DELETE endpoints, DELETE `/course` and DELETE `/student` are idempotent - deleting the same resoure multiple times
+    have the same effect as running it only once. See the guide on "has validation and returns an appropiate HTTP response code if the input data is invalid"
+    above for an example of running the DELETE requests >1 time and the result is the same - the specified row is deleted.
+    
+    - PUT `/student/pullup_gpa/{threshold}/{delta}` is NOT idempotent. Running it with the same query parameters multiple times will keep 
+    adding the students whose GPA is < `threshold` by `delta` - if the students' gpa will not exceed `threshold` after 
+    making this request once. Making the same request multiple times could lead to different results compared to running 
+    it only once, therefore this PUT endpoint is not idempotent.
+    
+    - There are 3 POST endpoints, POST `/course`, POST `/student` and POST `/file`, and all 3 are indempotent, contrary to
+    common POST endpoints, because **all 3 tables that these 3 POST endpoints aim to create resource in, do NOT allow 
+    duplicated rows**. 
+    
+    - Proof, run POST `/student` with the same payload multiple times:
+    
+    ```bash
+    pytest tests/test_create.py::test_create_student_success -s
+    pytest tests/test_create.py::test_create_student_success -s
+    pytest tests/test_create.py::test_create_student_success -s
+    ...
+    ```
+  
+    - you will notice that the server give you a 400 error for trying to create duplicated rows after making the request
+    once:
+    ```bash
+    collected 1 item                                                                                                                                                                                                                                                                                    
+
+    tests/test_create.py {"detail":"This student has already been created."}
+
+    E       assert 400 == 200
+    E        +  where 400 = <Response [400]>.status_code
+    
+    tests/test_create.py:36: AssertionError
+    ```
+    
+    - the table does not have multiple new rows added, the new row for `Samwell Tarly` is added only once:
+    ```bash
+    postgres=# SELECT * FROM student;
+     id |       name       |           email            | gpa | course_id 
+    ----+------------------+----------------------------+-----+-----------
+      1 | Walter White     | walter_white@sutd.edu      | 5.3 |          
+      2 | Jesse Pinkman    | jess_pinkman@sutd.edu      | 0.5 |          
+      3 | Gus String       | gus_string@sutd.edu        | 4.5 |          
+      4 | Hank Schrader    | hank_schrader@sutd.edu     | 4.5 |          
+      5 | Stannis Bar      | stannis_bar@sutd.edu       | 2.5 |          
+      6 | Jon Snow         | jon_snow@sutd.edu          |   2 |          
+      7 | Tyrion Lannister | tyrion_lanniester@sutd.edu |   5 |          
+      8 | Cersei Lannister | cersei_lannister@sutd.edu  |   1 |          
+      9 | Samwell Tarly    | samwell_tarly@sutd.edu     |   5 |          
+    (9 rows)
+
+    ```
+    
+    - Proof, run POST `/course` with the same payload multiple times:
+    ```bash
+    pytest tests/test_create.py::test_create_course_success -s
+    pytest tests/test_create.py::test_create_course_success -s
+    pytest tests/test_create.py::test_create_course_success -s
+    ...
+    ```
+  
+    - you will notice that the server give you a 400 error for trying to create duplicated rows after making the request
+    once:
+    ```bash
+    collected 1 item                                                                                                                                                                                                                                                                                    
+    
+    tests/test_create.py {"detail":"This course has already been created."}
+    
+    E       assert 400 == 200
+    E        +  where 400 = <Response [400]>.status_code
+    
+    tests/test_create.py:29: AssertionError
+    ```
+    
+    - the table does not have multiple new rows added, the new row for `Discrete Math` is added only once:
+    ```bash
+    postgres=# SELECT * FROM course;
+     id |         title          |          description          
+    ----+------------------------+-------------------------------
+      1 | Intro to Algo          | leetcode
+      2 | Digital World          | use jupyter notebook
+      3 | Computation Structures | most difficult module in ISTD
+      4 | Discrete Math          | sutd doesnt teach
+    (4 rows)
+    ```
+    
+    - The POST `file` endpoint is also idempotent because each time a file is upload, a row with the filename as `name`
+    is inserted into table `file`. because this table does not allow duplicated rows as well, making the same request > 1 
+    once will have the same effect as making the request only once.
+    
+    - run POST `/file` with the same payload multiple times: (in this test case, "chinese_meme_1.png")
+    ```bash
+    pytest tests/test_file.py::test_upload_idm -s
+    pytest tests/test_file.py::test_upload_idm -s
+    pytest tests/test_file.py::test_upload_idm -s
+    ...
+    ```
+    
+    - you will notice that the server give you a 400 error for trying to create duplicated rows after making the request
+    once:
+    ```bash
+    collected 1 item                                                                                                                                                                                                                                                                                    
+
+    tests/test_file.py {"detail":"A file with the same filename already exists."}
+    
+    E       assert 400 == 200
+    E        +  where 400 = <Response [400]>.status_code
+    
+    tests/test_create.py:29: AssertionError
+    ```
+    
+    - the table does not have multiple new rows added, the new row for `Discrete Math` is added only once:
+    ```bash
+    postgres=# SELECT * FROM file;
+    id |        name        
+    ----+--------------------
+    1 | chinese_meme_1.png
+    (1 row)
+
+    ```    
+    
     
 - Implement at least two of the following challenges:
     - File upload in a POST request, using multipart/form-data

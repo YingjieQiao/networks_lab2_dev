@@ -16,6 +16,14 @@ def test_upload():
     assert response.status_code == 200
 
 
+def test_upload_idm():
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "chinese_meme_1.png")
+    files = {"uploaded_file": ("chinese_meme_1.png", open(path, "rb"), "multipart/form-data")}
+    response = client.post("/file", files=files, headers={"X-Token": "my_nonna"})
+    print(response.text)
+    assert response.status_code == 200
+
+
 def test_download():
     target_endpoint = os.path.join("/file", UPLOAD_SUCCESS)
     response = client.get(target_endpoint, headers={"X-Token": "my_nonna"})
