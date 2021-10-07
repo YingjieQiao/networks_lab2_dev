@@ -130,7 +130,7 @@ docker-compose down --volumes
 
 
 - A REST-over-HTTP API written in any programming language, in any framework, to imitate any real life service (e.g. fake myportal, fake edimension), backed with any other supporting services (redis, mysql, etc):
-    - Can be deployed on any docker host using `docker compose` - you fail if I need to install any other dependencies on my computer!
+    - Can be deployed on any docker host using `docker-compose` - you fail if I need to install any other dependencies on my computer!
         - see the [Setup](#setup) section above. 
         - In short, run `docker-compose up` at project root folder, and then attach to the FastAPI container.
   
@@ -283,7 +283,6 @@ With accompanying `pytest` unit test files, showcasing your API's ability to res
             ```bash                                                                                                                                                                                                                                                                      
             collected 1 item                                                                                                                                                                                                                                                                                    
 
-            tests/test_get.py <app.app.models.Course object at 0x7f2c7f2d4100>
             {"title":"Discrete Math","description":"sutd doesnt teach","id":4,"enrolled_students":[]}
       
       
@@ -420,7 +419,7 @@ With accompanying `pytest` unit test files, showcasing your API's ability to res
         and the `course_id` of the `Student`, whose name is `Walter White`, is also updated.
         
         - check the effect of DELETE and PUT by observing the table:
-        - the newly added rows are deleted, and the foreign key of `Walter White` is updated to the `course_id` he has enrolled in.
+        - the newly added rows are deleted, and the foreign key, `course_id`, of `Walter White` is updated to the course he has enrolled in.
             ```bash
             postgres=# SELECT * FROM student;
              id |       name       |           email            | gpa | course_id 
@@ -485,7 +484,7 @@ With accompanying `pytest` unit test files, showcasing your API's ability to res
 - Identify which routes in your application are _idempotent_, 
 and provide proof to support your answer.
     - `PUT /course/{course_id}/{student_id}` is idempotent: 
-    calling it once or several times successively has the same effect (that is no side effect). 
+    calling it once or several times has the same effect. 
     For example, calling `PUT /course/1/1` will make sure the `Student` with `student_id = 1` 
     is under `Course` with `course_id = 1` and that `Course` with `course_id = 1` 
     will have `Student` with `student_id = 1` in its `enrolled_student` - calling multiple times
@@ -516,7 +515,7 @@ and provide proof to support your answer.
     above for an example of running the DELETE requests >1 time and the result is the same - the specified row is deleted.
     
     - PUT `/student/pullup_gpa/{threshold}/{delta}` is NOT idempotent. Running it with the same query parameters multiple times will keep 
-    adding the students whose GPA is < `threshold` by `delta` - if the students' gpa will not exceed `threshold` after 
+    adding the students whose GPA is < `threshold` by `delta` - if the students' updated gpa do not exceed `threshold` after 
     making this request once. Making the same request multiple times could lead to different results compared to running 
     it only once, therefore this PUT endpoint is not idempotent.
     
@@ -533,7 +532,7 @@ and provide proof to support your answer.
     ...
     ```
   
-    - you will notice that the server give you a 400 error for trying to create duplicated rows after making the request
+    - you will notice that the server will give you a 400 error for trying to create duplicated rows after making the request
     once:
     ```bash
     collected 1 item                                                                                                                                                                                                                                                                                    
@@ -551,7 +550,6 @@ and provide proof to support your answer.
     postgres=# SELECT * FROM student;
      id |       name       |           email            | gpa | course_id 
     ----+------------------+----------------------------+-----+-----------
-      1 | Walter White     | walter_white@sutd.edu      | 5.3 |          
       2 | Jesse Pinkman    | jess_pinkman@sutd.edu      | 0.5 |          
       3 | Gus String       | gus_string@sutd.edu        | 4.5 |          
       4 | Hank Schrader    | hank_schrader@sutd.edu     | 4.5 |          
@@ -559,8 +557,9 @@ and provide proof to support your answer.
       6 | Jon Snow         | jon_snow@sutd.edu          |   2 |          
       7 | Tyrion Lannister | tyrion_lanniester@sutd.edu |   5 |          
       8 | Cersei Lannister | cersei_lannister@sutd.edu  |   1 |          
-      9 | Samwell Tarly    | samwell_tarly@sutd.edu     |   5 |          
-    (9 rows)
+      1 | Walter White     | walter_white@sutd.edu      | 5.3 |         1
+     10 | Samwell Tarly    | samwell_tarly@sutd.edu     |   5 |          
+
 
     ```
     
@@ -572,7 +571,7 @@ and provide proof to support your answer.
     ...
     ```
   
-    - you will notice that the server give you a 400 error for trying to create duplicated rows after making the request
+    - you will notice that the server will give you a 400 error for trying to create duplicated rows after making the request
     once:
     ```bash
     collected 1 item                                                                                                                                                                                                                                                                                    
@@ -593,12 +592,12 @@ and provide proof to support your answer.
       1 | Intro to Algo          | leetcode
       2 | Digital World          | use jupyter notebook
       3 | Computation Structures | most difficult module in ISTD
-      4 | Discrete Math          | sutd doesnt teach
+      5 | Discrete Math          | sutd doesnt teach
     (4 rows)
     ```
     
-    - The POST `file` endpoint is also idempotent because each time a file is upload, a row with the filename as `name`
-    is inserted into table `file`. because this table does not allow duplicated rows as well, making the same request > 1 
+    - The POST `file` endpoint is also idempotent because each time a file is upload, a row with the filename as `name` column
+    is inserted into table `file`. Because this table does not allow duplicated rows as well, making the same request more than 
     once will have the same effect as making the request only once.
     
     - run POST `/file` with the same payload multiple times: (in this test case, "chinese_meme_1.png")
@@ -609,7 +608,7 @@ and provide proof to support your answer.
     ...
     ```
     
-    - you will notice that the server give you a 400 error for trying to create duplicated rows after making the request
+    - you will notice that the server will give you a 400 error for trying to create duplicated rows after making the request
     once:
     ```bash
     collected 1 item                                                                                                                                                                                                                                                                                    
@@ -652,7 +651,7 @@ and provide proof to support your answer.
         - A side note: To my knowledge, I think the best way to store large binary assets like image and video is to
         save them to an Object Store service like AWS S3, or a base64 string in the database table (for images), 
         or, save a path to the asset in the database table and keep
-        the asset somewhere on the server, which is more efficient. For simplicity, I am saving the images here to a 
+        the asset somewhere on the server, which is more efficient. For simplicity, I am saving the images here to the 
         server disk and the name of the file to the table `file` - the filename in the table will be used to construct 
         the path to the file for the GET request.
         
@@ -724,12 +723,15 @@ and provide proof to support your answer.
               4 | Hank Schrader    | hank_schrader@sutd.edu     | 4.5 |          
               7 | Tyrion Lannister | tyrion_lanniester@sutd.edu |   5 |          
               1 | Walter White     | walter_white@sutd.edu      | 5.3 |         1
+             10 | Samwell Tarly    | samwell_tarly@sutd.edu     |   5 |          
               2 | Jesse Pinkman    | jess_pinkman@sutd.edu      |   1 |          
               5 | Stannis Bar      | stannis_bar@sutd.edu       |   3 |          
               6 | Jon Snow         | jon_snow@sutd.edu          | 2.5 |          
               8 | Cersei Lannister | cersei_lannister@sutd.edu  | 1.5 |          
-            (8 rows)
+            (9 rows)
             ``` 
+          (This table has a new row for `Samwell Tarly`, `id=10`, which is added by the POST request in the idempotent endpoint proof section earlier.
+          The initial `Samwell Tarly` with `id=10` was deleted by the request made in the DELETE endpoint section.)
 
 > You must provide ample documentation on how to build & run your code and how to make the HTTP requests to your API, 
 >as well as what are the expected responses for each request. 

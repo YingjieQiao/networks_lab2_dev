@@ -120,7 +120,6 @@ def get_course_by_name(course_name: str, db: Session = Depends(get_db)):
     db_course = crud.get_course_by_name(db, course_name)
     if db_course is None:
         raise HTTPException(status_code=404, detail="Course not found")
-    print(db_course)
     return db_course
 
 
