@@ -519,7 +519,7 @@ and provide proof to support your answer.
     making this request once. Making the same request multiple times could lead to different results compared to running 
     it only once, therefore this PUT endpoint is not idempotent.
     
-    - There are 3 POST endpoints, POST `/course`, POST `/student` and POST `/file`, and all 3 are indempotent, contrary to
+    - There are 3 POST endpoints, POST `/course`, POST `/student` and POST `/file`, and all 3 are idempotent, contrary to
     common POST endpoints, because **all 3 tables that these 3 POST endpoints aim to create resource in, do NOT allow 
     duplicated rows**. 
     
@@ -545,7 +545,7 @@ and provide proof to support your answer.
     tests/test_create.py:36: AssertionError
     ```
     
-    - the table does not have multiple new rows added, the new row for `Samwell Tarly` is added only once:
+    - the table does not allow duplicated rows, the new row for `Samwell Tarly` is added only once:
     ```bash
     postgres=# SELECT * FROM student;
      id |       name       |           email            | gpa | course_id 
@@ -584,7 +584,7 @@ and provide proof to support your answer.
     tests/test_create.py:29: AssertionError
     ```
     
-    - the table does not have multiple new rows added, the new row for `Discrete Math` is added only once:
+    - the table does not allow duplicated rows, the new row for `Discrete Math` is added only once:
     ```bash
     postgres=# SELECT * FROM course;
      id |         title          |          description          
@@ -731,7 +731,7 @@ and provide proof to support your answer.
             (9 rows)
             ``` 
           (This table has a new row for `Samwell Tarly`, `id=10`, which is added by the POST request in the idempotent endpoint proof section earlier.
-          The initial `Samwell Tarly` with `id=10` was deleted by the request made in the DELETE endpoint section.)
+          The initial `Samwell Tarly` with `id=9` was deleted by the request made in the DELETE endpoint section.)
 
 > You must provide ample documentation on how to build & run your code and how to make the HTTP requests to your API, 
 >as well as what are the expected responses for each request. 
